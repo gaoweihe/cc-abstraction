@@ -87,19 +87,34 @@ bytes encrypted_result = encrypt(result, du_pkey);
     \item 模型不可见\\ 
     模型源代码不可见，仅将编译后的二进制文件传入计算平台。
 
-\begin{lstlisting}
+    \begin{lstlisting}
 // Signed dynamic library
 
 // Possible implementations in the future: 
 bytes model_so; 
 bytes encrypted_model = encrypt(model_so, platform_pkey); 
-\end{lstlisting}
+    \end{lstlisting}
 
     \item 模型用途限制\\ 
     计算平台解析模型元数据，检查模型参数和用途。
+
+    \begin{lstlisting}
+// Check params in model enclave
+    \end{lstlisting}
+
     \item 任务参数不可见\\ 
     数据使用方将计算任务参数加密后，传入计算平台。
+    
+    \begin{lstlisting}
+// Encrypt params with platform pkey
+    \end{lstlisting}
+    
     \item 原子交付\\
     通过智能合约，保证任务结果交付和任务费用交付的原子性绑定。
+
+    \begin{lstlisting}
+// Chains and smart contracts
+    \end{lstlisting}
+
 \end{enumerate}
 
