@@ -6,4 +6,5 @@
 *.out
 *.synctex.gz
 *.pdf 
+!figure/*.pdf
 *.dot 
