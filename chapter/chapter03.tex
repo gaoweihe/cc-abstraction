@@ -1,3 +1,23 @@
 \chapter{结论}
 
-本文希望将YPC普适性地扩展到众多TEE实现的框架。
+（TODO：）本文希望将YPC普适性地扩展到众多TEE实现的框架。首先列出YPC的功能特性，然后分析TEE的功能特性，找出二者的依赖关系。最终，抽象出YPC与其它TEE实现的共有API依赖集合。
+
+\begin{table*}[!htbp]
+    \centering
+    \begin{tabular}{lcccc}
+    \toprule
+    \textbf{功能} & \textbf{内存隔离} & \textbf{可信密钥} & \textbf{可信验证} & \textbf{SDK/seal ?} \\ \hline
+    本地数据可用不可见 & Y & Y & Y \\
+    托管数据可用不可见 & Y & Y & Y \\
+    结果的可信性证明 & Y & Y & Y \\
+    结果不可见 & Y & Y & Y \\
+    数据用途限制 & Y & Y & Y \\
+    模型不可见 & Y & Y & Y \\
+    模型用途限制 & Y & Y & Y \\
+    任务参数不可见 & Y & Y & Y \\
+    原子交付 & N & Y & Y \\
+    \bottomrule
+    \end{tabular}
+    \caption{YPC功能特性与TEE依赖关系}
+    \label{tab:scale-sol-comp}
+\end{table*}

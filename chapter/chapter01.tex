@@ -16,6 +16,8 @@ bytes t_mem_rd(src_addr, length);
 t_mem_wr(dest_addr, bytes, length);         
     \end{lstlisting}
 
+    内存安全可抽象为上述形式。但在程序设计过程中，通常预先假定代码是否在可信域中执行，而不是显示地调用读写可信内存的指令。因此，TEE的内存隔离功能，通常是结合编译器和链接器的支持实现的。例如，OpenEnclave提供了一套编译器和链接器，以支持TEE的内存隔离功能。
+
     \item 可信认证\\
     可信认证（attestation）通过可信硬件，以及一套安全的认证协议，证明TEE内的数据和代码未被篡改。这一功能可分为本地可信认证（LA）和远程可信认证（RA）。不同应用场景，对二者的需求不同。例如，类似YPC的OLAP框架通常至少需要依赖RA；但早期PC上的蓝光4K播放并不依赖实时的在线RA。
 
@@ -37,16 +39,37 @@ Report remote_attest(
 };   
     \end{lstlisting}
 
+    参考OpenEnclave的实现方法，远程认证的接口抽象为，
+    \begin{lstlisting}
+(pem-key, evidence) = 
+    ra_get_evidence(enclave-id)
+    \end{lstlisting}
+    其中，\texttt{pem-key}通常为与enclave相关的公钥，用于验证其身份；\texttt{evidence}为由可信硬件签署的身份证明，用于RA。
+
+    类似地，验证过程抽象为，
+    \begin{lstlisting}
+ret = ra_verify_evidence(enclave-id, 
+    pem-key, evidence)
+    \end{lstlisting}
+    
+    本地认证与远程认证过程类似，区别在于不需要额外的网络通信。本地认证在TEE内部，通过验证平台相关的\texttt{evidence}完成；远程认证需要TEE与外部的可信实体（如远程可信服务器）通信。
+
     \item 可信密钥\\
     TEE与可信平台模块（TPM）类似，也需要具备至少一个信任根EK。EK通常为设备相关的密钥。TEE设备行为的可信性认证，由该密钥签发。EK还可以生成更多的子密钥，以支持更加灵活的功能。显而易见地，这些子密钥依赖于平台信任根EK。
 
     \begin{lstlisting}
 // Endorsement key 
-Certificate get_ek_certificate(); 
-    \end{lstlisting}
+PubKey get_ek_pkey(); 
+    \end{lstlisting} 
+
+    EK还可以授权一系列子密钥，
+    \begin{lstlisting}
+(PrivKey, PubKey, Certificate) = gen_keypair(); 
+    \end{lstlisting} 
+    该过程返回一组密钥对，以及一份由EK签署的授权证明。
 
     \item 可信输入输出\\
-    为了提高外设（也包括部分总线设备）在TEE场景下的性能，一些（尤其是面向虚拟机的）TEE设计方案在逻辑上支持与裸金属（bare-metal）虚拟机类似的硬件直通。该功能一般称为可信输入输出（Trusted I/O）。它通常是通过计算机总线加密，或通信线缆加密实现。
+    （本文暂不讨论该功能）为了提高外设（也包括部分总线设备）在TEE场景下的性能，一些（尤其是面向虚拟机的）TEE设计方案在逻辑上支持与裸金属（bare-metal）虚拟机类似的硬件直通。该功能一般称为可信输入输出（Trusted I/O）。它通常是通过计算机总线加密，或通信线缆加密实现。
 \end{enumerate}
 
 一些TEE的实现可能只具备上述功能的一部分，也有一些产品支持更多扩展功能。这些差异，都不影响其被认为是TEE。但是，面向OLAP功能的TEE，一般至少要支持类似的功能，以提供特定场景下的安全性和可用性。本文以上述四个功能为基础，首先抽象其对应的API，然后尝试将其组合起来，构成与YPC类似的功能实现。
